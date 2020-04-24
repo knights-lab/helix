@@ -13,7 +13,7 @@ def make_arg_parser():
     parser.add_argument('-f', '--fastq', help='Set the directory path of the fastq', required=True)
     parser.add_argument('-b', '--blast', help='Set the directory path of the blast alignment', required=True)
     parser.add_argument('-o', '--output', help='Set the directory path of the output (default: cwd)', default=os.getcwd())
-
+    parser.add_argument('--original', default=False, action='store_true', help="Set if the sequence names are the original sequence names.")
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
     return parser
 
@@ -58,7 +58,7 @@ def read_fastq(fh):
         yield title, sequence, qualities
 
 
-def filter_reads(fp_fastq: str, outdir: str, filter_l: set) -> None:
+def filter_reads(fp_fastq: str, outdir: str, filter_l: set, change_flag: bool = False) -> None:
     f_reads = 0
     k_reads = 0
 
@@ -69,7 +69,10 @@ def filter_reads(fp_fastq: str, outdir: str, filter_l: set) -> None:
             with open(os.path.join(outdir, f"{base}.filtered.fq"), "w") as outf_outsample:
                 fastq_gen = read_fastq(inf_fastq)
                 for ix, (title, sequence, qualities) in enumerate(fastq_gen):
-                    name = f"{base}_{ix}"
+                    if not change_flag:
+                        name = f"{base}_{ix}"
+                    else:
+                        name = title.split()[0]
                     if name in filter_l:
                         outf_outsample.write(f"@{title}\n{sequence}\n+\n{qualities}\n")
                         f_reads += 1
@@ -90,7 +93,7 @@ def main():
 
     filter_l = build_read_filter_set(args.blast)
 
-    filter_reads(args.fastq, outdir, filter_l)
+    filter_reads(args.fastq, outdir, filter_l, change_flag=args.original)
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))
 
