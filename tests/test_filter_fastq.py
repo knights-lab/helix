@@ -20,9 +20,11 @@ def fastq_combined():
 def blast_no_change():
     return os.path.join("fixtures", "scratch", "alignment.burst.best.b6")
 
+
 @pytest.fixture()
 def fastq_no_change():
     return os.path.join("fixtures", "scratch", "Study.ID.1.T.0.S1.R1.001.fastq")
+
 
 # content of test_tmpdir.py
 def test_build_read_filter_set_combined(blast_combined):
