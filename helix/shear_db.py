@@ -52,7 +52,7 @@ def main():
     parser = make_arg_parser()
     args = parser.parse_args()
 
-    outdir = os.path.abspath(os.path.join(args.output))
+    outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
     os.makedirs(outdir, exist_ok=True)
 
     shear_fasta(args.fasta, args.output, args.read_length, args.step_size)
