@@ -34,6 +34,7 @@ def gen_strip_dangling_taxa(inf_path):
             strip_str = strip_dangling_taxa(taxa_str)
             yield row[0], strip_str
 
+
 def main():
     start_time = datetime.datetime.now()
 
