@@ -68,10 +68,10 @@ def read_fasta(fh):
 
 def mask_fasta(gen_fasta, mask_dict):
     for title, data in gen_fasta:
-        np_data = np.fromiter(data, dtype='S1')
+        np_data = np.fromiter(data, dtype='S1', count=len(data))
         for mask in mask_dict[title]:
             np_data[mask[0] - 1:mask[1] - 1] = "N"
-        yield title, np_data.tostring().decode('utf-8')
+        yield title, np_data.tobytes().decode()
 
 
 def main():
@@ -85,7 +85,7 @@ def main():
 
     dd_mask_hits = build_mask_dict(args.blast)
 
-    with open(args.fasta) as inf:
+    with open(args.fasta, "rb") as inf:
         gen_fasta = read_fasta(inf)
         gen_mask_fasta = mask_fasta(gen_fasta, dd_mask_hits)
         with open(args.output, "w") as outf:
