@@ -56,14 +56,14 @@ def read_fasta(fh):
     for line in fh:
         if line[0] == ">":
             if title:
-                yield (title.strip(), data)
+                yield title.strip(), data
             title = line[1:]
             data = ''
         else:
             data += line.strip()
     if not title:
         yield None
-    yield (title.strip(), data)
+    yield title.strip(), data
 
 
 def mask_fasta(gen_fasta, mask_dict):
@@ -83,7 +83,14 @@ def main():
     outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
     os.makedirs(outdir, exist_ok=True)
 
-    dd_mask_hits = build_mask_dict(args.input)
+    dd_mask_hits = build_mask_dict(args.blast)
+
+    with open(args.fasta) as inf:
+        gen_fasta = read_fasta(inf)
+        gen_mask_fasta = mask_fasta(gen_fasta, dd_mask_hits)
+        with open(args.output, "w") as outf:
+            for header, seq in gen_mask_fasta:
+                outf.write(f">{header}\n{seq}\n")
 
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))

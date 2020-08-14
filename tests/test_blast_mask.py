@@ -5,6 +5,7 @@ import numpy as np
 
 from helix.blast_mask import gen_blast_reads_hits, build_mask_dict, mask_fasta, read_fasta
 
+
 @pytest.fixture
 def gtdb_20_database() -> str:
     return os.path.join("fixtures", "gtdb_20.fna")
