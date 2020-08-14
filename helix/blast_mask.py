@@ -92,7 +92,6 @@ def main():
             for header, seq in gen_mask_fasta:
                 outf.write(f">{header}\n{seq}\n")
 
-
     print("Execution time: %s" % (datetime.datetime.now() - start_time))
 
 
