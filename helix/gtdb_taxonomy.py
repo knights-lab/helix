@@ -30,6 +30,7 @@ def gtdb_taxonomy(fasta_inf: str, outf: str, tax_inf: str):
             for line in inf:
                 line = line.rstrip()
                 header, tax = line.split("\t")
+                tax = tax.replace(" ", "_")
                 header = "_".join(header.split("_")[1:])
                 if header in headers:
                     outf.write(f"{header}\t{tax}\n")
