@@ -5,6 +5,7 @@
 import argparse
 import datetime
 import os
+import sys
 
 
 def make_arg_parser():
@@ -20,20 +21,43 @@ def make_arg_parser():
 
 
 def gtdb_taxonomy(fasta_inf: str, outf: str, tax_inf: str):
-    headers = set()
+    headers_fasta = set()
+    headers_map = set()
+    # we need assert that all headers are unique in both the taxamap
+    # make sure that all headers are found in the taxamap
     with open(fasta_inf) as inf:
         for line in inf:
             if line.startswith(">"):
-                headers.add(line.rstrip()[1:])
+                header = line.rstrip()[1:]
+                if header in headers_fasta:
+                    sys.stderr.write(f"WARNING: the header {header} found twice in the input FASTA {fasta_inf}")
+                headers_fasta.add(header)
     with open(outf, "w") as outf:
         with open(tax_inf) as inf:
             for line in inf:
                 line = line.rstrip()
                 header, tax = line.split("\t")
                 tax = tax.replace(" ", "_")
-                header = "_".join(header.split("_")[1:])
-                if header in headers:
+                tax = strip_dangling_taxa(tax)
+                # header = "_".join(header.split("_")[1:])
+                if header in headers_fasta:
                     outf.write(f"{header}\t{tax}\n")
+                    if header in headers_map:
+                       sys.stderr.write(f"WARNING: the header {header} found twice in the input map {tax_inf}")
+                    headers_map.add(header)
+    headers_difference = headers_fasta.difference(headers_map)
+    if len(headers_difference) > 0:
+        sys.stderr.write(f"WARNING: the headers {headers_difference} not found in the input map")
+
+
+def strip_dangling_taxa(taxa_str: str) -> str:
+    taxa_l = taxa_str.split(";")
+    for ix in range(len(taxa_l) - 1, -1, -1):
+        taxa_str = taxa_l[ix]
+        if len(taxa_str) > 3 and not taxa_str.endswith("__"):
+            break
+    taxa_str = ";".join(taxa_l[:ix + 1])
+    return taxa_str
 
 
 def main():
