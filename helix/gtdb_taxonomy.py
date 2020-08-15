@@ -39,7 +39,7 @@ def gtdb_taxonomy(fasta_inf: str, outf: str, tax_inf: str):
                 header, tax = line.split("\t")
                 tax = tax.replace(" ", "_")
                 tax = strip_dangling_taxa(tax)
-                # header = "_".join(header.split("_")[1:])
+                header = "_".join(header.split("_")[1:])
                 if header in headers_fasta:
                     outf.write(f"{header}\t{tax}\n")
                     if header in headers_map:
