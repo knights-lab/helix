@@ -32,6 +32,7 @@ def gen_strip_dangling_taxa(inf_path):
         for row in csv_reader:
             taxa_str = row[1]
             strip_str = strip_dangling_taxa(taxa_str)
+            strip_str = strip_str.replace(" ", "_")
             yield row[0], strip_str
 
 
