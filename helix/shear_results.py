@@ -16,7 +16,7 @@ def make_arg_parser():
         usage='shear_db %s -b <input_blast> -f <input_fastq> -o <output_file>'
     )
     parser.add_argument('-t', '--taxonomy_table', help='Set the directory path of the input taxonomy table', required=True)
-    parser.add_argument('-m', '--taxonmy_map', help='Set the directory path of the input taxonomy map', required=True)
+    parser.add_argument('-m', '--taxonomy_map', help='Set the directory path of the input taxonomy map', required=True)
     parser.add_argument('-o', '--output', help='Set the directory path of the output sheared_bayes file (default: cwd)', default=os.path.join(os.getcwd(), "sheared_bayes.txt"))
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
     return parser
