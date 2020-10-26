@@ -84,7 +84,7 @@ def main():
     outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
     os.makedirs(outdir, exist_ok=True)
 
-    dd_mask_hits = build_mask_dict(args.blast, args.shear_length)
+    dd_mask_hits = build_mask_dict(args.blast, args.read_length)
 
     with open(args.fasta, "rb") as inf:
         gen_fasta = read_fasta(inf)
