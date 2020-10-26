@@ -53,13 +53,13 @@ def read_fasta(fh):
     :return: tuples of (title, seq)
     """
     title = None
-    data = ''
+    data = b''
     for line in fh:
-        if line[0] == ">":
+        if line[0] == b">":
             if title:
                 yield title.strip(), data
             title = line[1:]
-            data = ''
+            data = b''
         else:
             data += line.strip()
     if not title:
