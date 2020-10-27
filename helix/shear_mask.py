@@ -69,9 +69,13 @@ def read_fasta(fh):
 
 def mask_fasta(gen_fasta, mask_dict):
     for title, data in gen_fasta:
-        np_data = np.fromiter(data, dtype='S1', count=len(data))
+        length = len(data)
+        np_data = np.fromiter(data, dtype='S1', count=length)
         for mask in mask_dict[title]:
-            np_data[mask[0] - 1:mask[1] - 1] = "N"
+            mask_end = mask[1] - 1
+            if mask_end > length:
+                mask_end = length - 1
+            np_data[mask[0] - 1:mask_end] = "N"
         yield title, np_data.tobytes().decode()
 
 
