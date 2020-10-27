@@ -53,18 +53,17 @@ def read_fasta(fh):
     :return: tuples of (title, seq)
     """
     title = None
-    data = b''
+    data = ""
     for line in fh:
-        if line[0] == b">":
+        if line[0] == ">":
             if title:
                 yield title.strip(), data
             title = line[1:]
-            data = b''
+            data = ""
         else:
             data += line.strip()
-    if not title:
-        yield None
-    yield title.strip(), data
+    if title:
+        yield title.strip(), data
 
 
 def mask_fasta(gen_fasta, mask_dict):
@@ -90,7 +89,7 @@ def main():
 
     dd_mask_hits = build_mask_dict(args.blast, args.read_length)
 
-    with open(args.fasta, "rb") as inf:
+    with open(args.fasta, "r") as inf:
         gen_fasta = read_fasta(inf)
         gen_mask_fasta = mask_fasta(gen_fasta, dd_mask_hits)
         with open(args.output, "w") as outf:
