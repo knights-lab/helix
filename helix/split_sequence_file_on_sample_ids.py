@@ -63,8 +63,8 @@ def main():
     parser = make_arg_parser()
     args = parser.parse_args()
 
-    outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
-    os.makedirs(outdir, exist_ok=True)
+    # outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
+    os.makedirs(args.output, exist_ok=True)
 
     split_sequence_file(args.fasta, args.output, buffer=args.buffer)
 
