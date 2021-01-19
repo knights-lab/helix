@@ -53,7 +53,7 @@ def split_sequence_file(fasta, output_dir, buffer=1_000_000):
                 d_group[sample_id] = d_group[sample_id] + f">{header}\n{seq}\n"
             for k, v in d_group.items():
                 outfile = os.path.join(output_dir, f"{k}.fna")
-                with open(outfile, "w+") as outfile:
+                with open(outfile, "a+") as outfile:
                     outfile.write(v)
 
 
