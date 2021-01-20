@@ -5,6 +5,7 @@ import os
 import csv
 from collections import defaultdict
 import numpy as np
+import re
 
 
 def make_arg_parser():
@@ -15,6 +16,7 @@ def make_arg_parser():
     parser.add_argument('-f', '--fasta', help='Set the directory path of the input fasta file', required=True)
     parser.add_argument('-b', '--blast', help="Set the path of the input blast file", required=True)
     parser.add_argument('-r', '--read_length', help='Set the read length of output reads', required=True, type=int)
+    parser.add_argument('-l', '--length', help="Maximum length of consecutive Ns", required=False, type=int, default=15)
     parser.add_argument('-o', '--output', help='Set the directory path of the output masked fasta file (default: cwd)', required=True)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
     return parser
@@ -78,6 +80,14 @@ def mask_fasta(gen_fasta, mask_dict):
         yield title, np_data.tobytes().decode()
 
 
+def cleanup_sequence(s: str, length=15) -> str:
+    s_regex = f"(N{{{length},}})"
+    regex = re.compile(s_regex)
+    s = s.upper()
+    clean = re.sub(regex, 'NNNNNNNNNNNNNNN', s)
+    return clean.strip('N')
+
+
 def main():
     start_time = datetime.datetime.now()
 
@@ -94,6 +104,7 @@ def main():
         gen_mask_fasta = mask_fasta(gen_fasta, dd_mask_hits)
         with open(args.output, "w") as outf:
             for header, seq in gen_mask_fasta:
+                seq = cleanup_sequence(seq, length=args.length)
                 outf.write(f">{header}\n{seq}\n")
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))

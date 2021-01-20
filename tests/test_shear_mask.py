@@ -3,7 +3,7 @@ import os
 import pytest
 import numpy as np
 
-from helix.shear_mask import gen_blast_reads_hits, build_mask_dict, mask_fasta, read_fasta
+from helix.shear_mask import gen_blast_reads_hits, build_mask_dict, mask_fasta, read_fasta, cleanup_sequence
 
 
 @pytest.fixture
@@ -42,3 +42,9 @@ def test_mask_blast(gtdb_20_database, gtdb_shear_dict):
                 num_N_in_masks += (mask[1] - mask[0])
 
             assert d_sums_before[header] + num_N_in_masks == s
+
+
+def test_cleanup_Ns():
+    s = "NNNNNaatatatatataaccccccNNNNNNNNNNNNNNNNNNNNatataNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNtatataNNNNNNNNNNNNNNNaatatatataaatnnnnn"
+    clean = cleanup_sequence(s)
+    print(clean)
