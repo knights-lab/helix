@@ -29,8 +29,8 @@ def index_lca(str1: str, str2: str) -> int:
     return 8
 
 
-def shear_results(alignment: str, taxa_table: str, output: str) -> None:
-    with open(alignment, 'r') as inf:
+def shear_results(taxonomy_table: str, taxonomy_map: str, output: str) -> None:
+    with open(taxonomy_table, 'r') as inf:
         csv_inf = csv.reader(inf, delimiter="\t")
         columns = next(csv_inf)
         columns = dict(zip(columns[1:], range(len(columns))))
@@ -50,7 +50,7 @@ def shear_results(alignment: str, taxa_table: str, output: str) -> None:
 
     csr = csr_matrix((data, indices, indptr), dtype=int).T
 
-    with open(taxa_table) as inf:
+    with open(taxonomy_map) as inf:
         csv_inf = csv.reader(inf, delimiter='\t')
         name2taxonomy = dict(csv_inf)
 
@@ -92,7 +92,7 @@ def main():
     outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
     os.makedirs(outdir, exist_ok=True)
 
-    shear_results(args.alignment, args.taxa_table, args.output)
+    shear_results(args.taxonomy_table, args.taxonomy_map, args.output)
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))
 
