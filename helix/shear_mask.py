@@ -84,7 +84,7 @@ def cleanup_sequence(s: str, length=15) -> str:
     s_regex = f"(N{{{length},}})"
     regex = re.compile(s_regex)
     s = s.upper()
-    clean = re.sub(regex, 'NNNNNNNNNNNNNNN', s)
+    clean = re.sub(regex, 'N'*length, s)
     return clean.strip('N')
 
 
