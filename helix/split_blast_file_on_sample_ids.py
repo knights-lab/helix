@@ -11,7 +11,7 @@ def make_arg_parser():
     parser = argparse.ArgumentParser(
         description='This is the commandline interface for split_sequence_file_on_sample_ids',
     )
-    parser.add_argument('-i', '--infile', help='Set the directory path of the input blast file', required=True)
+    parser.add_argument('-i', '--input', help='Set the directory path of the input blast file', required=True)
     parser.add_argument('-o', '--output', help='Set the directory path of the output folder (default: cwd)', default=os.getcwd())
     parser.add_argument('-b', '--buffer', help="the buffer size", type=int, default=1_000_000)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
@@ -32,8 +32,8 @@ def grouper(iterable, n, fillvalue=None):
     return zip_longest(*args, fillvalue=fillvalue)
 
 
-def split_sequence_file(fasta, output_dir, buffer=1_000_000):
-    with open(fasta) as inf:
+def split_sequence_file(input, output_dir, buffer=1_000_000):
+    with open(input) as inf:
         for group in grouper(read_blast(inf), buffer):
             d_group = defaultdict(str)
             for header, row in group:
@@ -54,7 +54,7 @@ def main():
     # outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
     os.makedirs(args.output, exist_ok=True)
 
-    split_sequence_file(args.fasta, args.output, buffer=args.buffer)
+    split_sequence_file(args.input, args.output, buffer=args.buffer)
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))
 
