@@ -10,7 +10,7 @@ def make_arg_parser():
         description='This is the commandline interface for filter_fasta',
     )
     parser.add_argument('-f', '--fasta', help='Set the directory path of the fasta', required=True)
-    parser.add_argument('-s', '--sam', help='Set the directory path of the alignment tsv', required=True)
+    parser.add_argument('-a', '--alignment', help='Set the directory path of the alignment tsv', required=True)
     parser.add_argument('-o', '--output', help='Set the directory path of the output (default: cwd)', default=os.getcwd())
     parser.add_argument('--original', default=False, action='store_true', help='Set if the sequence names are the original sequence names.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
@@ -87,7 +87,7 @@ def main():
     outdir = os.path.abspath(os.path.join(args.output))
     os.makedirs(outdir, exist_ok=True)
 
-    filter_l = build_read_filter_set(args.blast)
+    filter_l = build_read_filter_set(args.alignment)
 
     filter_reads(args.fasta, outdir, filter_l, change_flag=args.original)
 
