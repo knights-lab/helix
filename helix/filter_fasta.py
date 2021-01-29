@@ -64,17 +64,19 @@ def filter_reads(fp_fasta: str, outdir: str, filter_l: set, change_flag: bool = 
         with open(os.path.join(outdir, f"{base}.fq"), "w") as outf_insample:
             with open(os.path.join(outdir, f"{base}.filtered.fq"), "w") as outf_outsample:
                 fasta_gen = read_fasta(inf_fasta)
-                for ix, (title, sequence, qualities) in enumerate(fasta_gen):
-                    if not change_flag:
-                        name = f"{base}_{ix}"
-                    else:
-                        name = title.split()[0]
-                    if name in filter_l:
-                        outf_outsample.write(f"@{title}\n{sequence}\n+\n{qualities}\n")
-                        f_reads += 1
-                    else:
-                        outf_insample.write(f"@{title}\n{sequence}\n+\n{qualities}\n")
-                        k_reads += 1
+                for ix, _ in enumerate(fasta_gen):
+                    if len(_) == 2:
+                        (title, sequence) = _
+                        if not change_flag:
+                            name = f"{base}_{ix}"
+                        else:
+                            name = title.split()[0]
+                        if name in filter_l:
+                            outf_outsample.write(f">{title}\n{sequence}\n")
+                            f_reads += 1
+                        else:
+                            outf_insample.write(f">{title}\n{sequence}\n")
+                            k_reads += 1
     print(f"Filtered reads:\t{f_reads}\nKept reads:\t{k_reads}")
 
 
