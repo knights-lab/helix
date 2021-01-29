@@ -38,7 +38,7 @@ def split_sequence_file(input, output_dir, buffer=1_000_000):
             d_group = defaultdict(str)
             for header, row in group:
                 sample_id = header.split()[0].split("_")[0]
-                d_group[sample_id] = row
+                d_group[sample_id] = d_group[sample_id] + row
             for k, v in d_group.items():
                 outfile = os.path.join(output_dir, f"{k}.b6")
                 with open(outfile, "a+") as outfile:
