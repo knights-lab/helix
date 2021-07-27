@@ -4,6 +4,8 @@ import argparse
 import datetime
 import os
 
+from helix.utils.utils import read_fasta
+
 
 def make_arg_parser():
     parser = argparse.ArgumentParser(
@@ -16,25 +18,6 @@ def make_arg_parser():
     parser.add_argument('-o', '--output', help='Set the directory path of the output taxatable (default: cwd)', default=os.path.join(os.getcwd(), "shear.fna"))
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
     return parser
-
-
-def read_fasta(fh):
-    """
-    :return: tuples of (title, seq)
-    """
-    title = None
-    data = None
-    for line in fh:
-        if line[0] == ">":
-            if title:
-                yield title.strip(), data
-            title = line[1:]
-            data = ''
-        else:
-            data += line.strip()
-    if not title:
-        yield None
-    yield title.strip(), data
 
 
 def crop(fasta_in, fasta_out, min_length: int, max_length: int):
