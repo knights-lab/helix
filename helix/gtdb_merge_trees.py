@@ -9,9 +9,6 @@ import re
 
 from helix.utils import download_txt_url
 
-from typing import Tuple
-from pathlib import Path
-
 from ete3 import Tree
 import dendropy
 
@@ -98,7 +95,7 @@ def main():
 
     ete_tree = merge_trees(str_arc_tree, str_bac_tree)
 
-    ete_tree.write(args.output, format=3)
+    ete_tree.write(outfile=args.output, format=3, quoted_node_names=True)
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))
 
