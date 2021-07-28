@@ -5,7 +5,6 @@
 import argparse
 import datetime
 import os
-import sys
 import re
 
 from helix.utils import download_txt_url
@@ -14,33 +13,26 @@ from typing import Tuple
 from pathlib import Path
 
 from ete3 import Tree
+import dendropy
 
-url_archaea = "https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/ar122.tree"
-url_bacteria = "https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/bac120.tree"
+URL_ARCHAEA = "https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/ar122.tree"
+URL_BACTERIA = "https://data.ace.uq.edu.au/public/gtdb/data/releases/latest/bac120.tree"
 
 
 def make_arg_parser():
     parser = argparse.ArgumentParser(
         description='This is the commandline interface for shear_db',
-        usage='shear_db %s -b <input_blast> -f <input_fastq> -o <output_file>'
     )
-    parser.add_argument('-f', '--fasta', help='Set the directory path of the input fasta', required=True)
-    parser.add_argument('-t', '--taxa_table', help='Set the directory path of the input taxafile', required=True)
-    parser.add_argument('-o', '--output', help='Set the directory path of the output taxatable (default: cwd)', default=os.path.join(os.getcwd(), "shear.fna"))
-    parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
+    parser.add_argument(
+        '-a', '--path_archaea', help='Set the file path of the input archaea newick tree', required=False)
+    parser.add_argument(
+        '-b', '--path_bacteria', help='Set the file path of the input bacteria newick tree', required=False)
+    parser.add_argument(
+        '-o', '--output', help='Set the directory path of the output combined sequences (default: cwd)',
+        default=os.path.join(os.getcwd(), "combo.tree"))
+    parser.add_argument(
+        '-v', '--version', action='version', version='%(prog)s ')
     return parser
-
-
-def read_tree(nw_tree: str) -> Tree:
-    for format in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 100]:
-        try:
-            t = Tree(nw_tree, format=format)
-            print(format)
-        except BaseException as e:
-            print(f"format: {format} failed")
-            continue
-    # t.unroot()
-    return t
 
 
 def gtdb_format_names(str_tree: str) -> str:
@@ -50,44 +42,37 @@ def gtdb_format_names(str_tree: str) -> str:
     return str_tree
 
 
-def gtdb_taxonomy(fasta_inf: str, outf: str, tax_inf: str):
-    headers_fasta = set()
-    headers_map = set()
-    # we need assert that all headers are unique in both the taxamap
-    # make sure that all headers are found in the taxamap
-    with open(fasta_inf) as inf:
-        for line in inf:
-            if line.startswith(">"):
-                header = line.rstrip()[1:]
-                if header in headers_fasta:
-                    sys.stderr.write(f"WARNING: the header {header} found twice in the input FASTA {fasta_inf}")
-                headers_fasta.add(header)
-    with open(outf, "w") as outf:
-        with open(tax_inf) as inf:
-            for line in inf:
-                line = line.rstrip()
-                header, tax = line.split("\t")
-                tax = tax.replace(" ", "_").replace("d__", "k__")
-                tax = strip_dangling_taxa(tax)
-                header = "_".join(header.split("_")[1:])
-                if header in headers_fasta:
-                    outf.write(f"{header}\t{tax}\n")
-                    if header in headers_map:
-                       sys.stderr.write(f"WARNING: the header {header} found twice in the input map {tax_inf}")
-                    headers_map.add(header)
-    headers_difference = headers_fasta.difference(headers_map)
-    if len(headers_difference) > 0:
-        sys.stderr.write(f"WARNING: the headers {headers_difference} not found in the input map")
+def merge_trees(str_arc_tree: str, str_bac_tree: str):
+    str_arc_tree = gtdb_format_names(str_arc_tree)
 
+    dendro_tree_arc = dendropy.Tree.get_from_string(
+        str_arc_tree, schema='newick', rooting='force-rooted', preserve_underscores=True)
 
-def strip_dangling_taxa(taxa_str: str) -> str:
-    taxa_l = taxa_str.split(";")
-    for ix in range(len(taxa_l) - 1, -1, -1):
-        taxa_str = taxa_l[ix]
-        if len(taxa_str) > 3 and not taxa_str.endswith("__"):
-            break
-    taxa_str = ";".join(taxa_l[:ix + 1])
-    return taxa_str
+    max_length = 0
+    for edge in dendro_tree_arc.postorder_edge_iter():
+        if edge.length:
+            if edge.length > max_length:
+                max_length = edge.length
+
+    str_bac_tree = gtdb_format_names(str_bac_tree)
+
+    dendro_tree_bac = dendropy.Tree.get_from_string(
+        str_bac_tree, schema='newick', rooting='force-rooted', preserve_underscores=True)
+
+    for edge in dendro_tree_bac.postorder_edge_iter():
+        if edge.length:
+            if edge.length > max_length:
+                max_length = edge.length
+
+    ete_tree_arc = Tree(dendro_tree_arc.as_string(schema="newick", suppress_rooting=True), format=1, quoted_node_names=True)
+    ete_tree_bac = Tree(dendro_tree_bac.as_string(schema="newick", suppress_rooting=True), format=1, quoted_node_names=True)
+
+    ete_tree = Tree(name='root')
+
+    ete_tree.add_child(ete_tree_arc.get_tree_root(), dist=max_length)
+    ete_tree.add_child(ete_tree_bac.get_tree_root(), dist=max_length)
+
+    return ete_tree
 
 
 def main():
@@ -99,7 +84,21 @@ def main():
     outdir = os.path.dirname(os.path.abspath(os.path.join(args.output)))
     os.makedirs(outdir, exist_ok=True)
 
-    gtdb_taxonomy(args.fasta, args.output, args.taxa_table)
+    if not args.path_archaea:
+        str_arc_tree = ''.join(_ for _ in download_txt_url(URL_ARCHAEA))
+    else:
+        with open(args.path_archaea) as inf:
+            str_arc_tree = inf.readlines()[0]
+
+    if not args.path_archaea:
+        str_bac_tree = ''.join(_ for _ in download_txt_url(URL_BACTERIA))
+    else:
+        with open(args.path_bacteria) as inf:
+            str_bac_tree = inf.readlines()[0]
+
+    ete_tree = merge_trees(str_arc_tree, str_bac_tree)
+
+    ete_tree.write(args.output, format=3)
 
     print("Execution time: %s" % (datetime.datetime.now() - start_time))
 

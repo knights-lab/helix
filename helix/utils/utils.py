@@ -1,4 +1,4 @@
-import urllib
+import requests
 
 
 def read_fasta(fh):
@@ -20,12 +20,11 @@ def read_fasta(fh):
     yield title.strip(), data
 
 
-def download_txt_url(path_to_file, url):
-    with urllib.request.urlopen(url) as stream:
-        CHUNK = 2 ** 14
-        with open(path_to_file, 'wb') as outfile:
-            while True:
-                chunk = stream.read(CHUNK)
-                if not chunk:
-                    break
-                outfile.write(chunk)
+def download_txt_url(url):
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            for chunk in r.iter_content(chunk_size=8192, decode_unicode=True):
+                # If you have chunk encoded response uncomment if
+                # and set chunk_size parameter to None.
+                # if chunk:
+                yield chunk
