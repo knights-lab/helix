@@ -40,7 +40,7 @@ def get_annotations(taxa_map: dict, annotations: pathlib.Path) -> dict:
                     num_in += 1
                     ko = row[11]
                     if ko.startswith("ko:"):
-                        for ko in ko.split(" ,ko:"):
+                        for ko in ko.split(",ko:"):
                             results[taxa_map[query]].append(ko)
                 else:
                     num_out += 1
