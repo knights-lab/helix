@@ -10,7 +10,7 @@ def make_arg_parser():
     )
     parser.add_argument('-t', '--taxa_map', help='Set the path to the input taxamap', required=True)
     parser.add_argument('-a', '--annotation', help='Set the path to the csv annotation file', required=True)
-    parser.add_argument('-o', '--output', help='Set the directory path of the output (default: cwd)', default=os.path.join(os.getcwd() + "results.txt"))
+    parser.add_argument('-o', '--output', help='Set the directory path of the output (default: cwd)', default=os.path.join(os.getcwd() + "ko-strain2ko.txt"))
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ')
     return parser
 
@@ -41,7 +41,7 @@ def get_annotations(taxa_map: dict, annotations: pathlib.Path) -> dict:
                     ko = row[11]
                     if ko.startswith("ko:"):
                         for ko in ko.split("ko:"):
-                            results[query].append(ko)
+                            results[taxa_map[query]].append(ko)
                 else:
                     num_out += 1
                     # raise Exception(f"{query} not in Map")
