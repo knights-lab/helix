@@ -50,7 +50,8 @@ def main():
     parser = make_arg_parser()
     args = parser.parse_args()
 
-    results = get_annotations(args.taxa_map, args.annotation)
+    taxa_map = get_taxamap(args.taxa_map)
+    results = get_annotations(taxa_map, args.annotation)
 
     with open(args.output, "w") as outf:
         for k, v in results.items():
