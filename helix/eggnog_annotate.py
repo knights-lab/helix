@@ -52,7 +52,7 @@ def main():
 
     results = get_annotations(args.taxa_map, args.annotation)
 
-    with open(args.output) as outf:
+    with open(args.output, "w") as outf:
         for k, v in results.items():
             outf.write(k + "\t" + "\t".join(v) + "\n")
 
